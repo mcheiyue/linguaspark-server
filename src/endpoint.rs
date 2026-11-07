@@ -1,8 +1,8 @@
 use crate::{
     AppError, AppState,
     translation::{
-        detect_language_code, language_code, normalize_language_code, perform_batch_translation,
-        perform_translation,
+        TranslationOptions, detect_language_code, language_code, normalize_language_code,
+        perform_batch_translation, perform_formatted_batch, perform_translation,
     },
 };
 use axum::{Json, extract::State};
@@ -50,6 +50,8 @@ pub struct TranslationRequest {
     text: TranslationInput,
     from: Option<String>,
     to: String,
+    #[serde(default)]
+    html: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -57,20 +59,51 @@ pub struct TranslationResponse {
     text: TranslationOutput,
     from: String,
     to: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sources: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct LanguagesResponse(BTreeMap<String, BTreeSet<String>>);
 
+fn batch_source_language(sources: impl IntoIterator<Item = String>) -> String {
+    let sources = sources
+        .into_iter()
+        .filter(|source| source != "und")
+        .collect::<BTreeSet<_>>();
+    if sources.len() == 1 {
+        match sources.into_iter().next() {
+            Some(source) => source,
+            None => "und".to_owned(),
+        }
+    } else if sources.is_empty() {
+        "und".to_owned()
+    } else {
+        "mul".to_owned()
+    }
+}
+
 pub async fn translate(
     State(state): State<Arc<AppState>>,
     Json(request): Json<TranslationRequest>,
 ) -> Result<Json<TranslationResponse>, AppError> {
-    let (text, from_lang, to_lang) = match request.text {
+    let (text, from_lang, to_lang, sources) = match request.text {
         TranslationInput::Single(text) => {
-            let (text, from, to) =
-                perform_translation(&state, &text, request.from, &request.to).await?;
-            (TranslationOutput::Single(text), from, to)
+            let to = normalize_language_code(&request.to)?.to_string();
+            let mut translated = perform_formatted_batch(
+                &state,
+                vec![text],
+                TranslationOptions {
+                    from: request.from.as_deref(),
+                    to: &request.to,
+                    html: request.html,
+                },
+            )
+            .await?;
+            let (text, from) = translated
+                .pop()
+                .ok_or_else(|| AppError::InferenceError("Missing single translation".into()))?;
+            (TranslationOutput::Single(text), from, to, None)
         }
         TranslationInput::Batch(texts) => {
             if texts.is_empty() {
@@ -79,14 +112,19 @@ pub async fn translate(
                 ));
             }
             let to = normalize_language_code(&request.to)?.to_string();
-            let translations =
-                perform_batch_translation(&state, texts, request.from, &request.to).await?;
-            let from = translations
-                .first()
-                .map(|(_, from)| from.clone())
-                .expect("non-empty translation batch must return source language");
-            let texts = translations.into_iter().map(|(text, _)| text).collect();
-            (TranslationOutput::Batch(texts), from, to)
+            let translations = perform_formatted_batch(
+                &state,
+                texts,
+                TranslationOptions {
+                    from: request.from.as_deref(),
+                    to: &request.to,
+                    html: request.html,
+                },
+            )
+            .await?;
+            let (texts, sources): (Vec<_>, Vec<_>) = translations.into_iter().unzip();
+            let from = batch_source_language(sources.iter().cloned());
+            (TranslationOutput::Batch(texts), from, to, Some(sources))
         }
     };
 
@@ -94,6 +132,7 @@ pub async fn translate(
         text,
         from: from_lang,
         to: to_lang,
+        sources,
     }))
 }
 
@@ -292,4 +331,36 @@ pub async fn languages(
         .collect();
 
     Ok(Json(LanguagesResponse(languages)))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn single_response_omits_batch_sources() {
+        let response = TranslationResponse {
+            text: TranslationOutput::Single("Hello".into()),
+            from: "zh".into(),
+            to: "en".into(),
+            sources: None,
+        };
+        assert_eq!(
+            serde_json::to_value(response).unwrap(),
+            serde_json::json!({"text": "Hello", "from": "zh", "to": "en"})
+        );
+    }
+
+    #[test]
+    fn batch_source_language_ignores_unknown_sources_when_known_sources_exist() {
+        assert_eq!(
+            batch_source_language(["und".to_owned(), "en".to_owned()]),
+            "en"
+        );
+        assert_eq!(
+            batch_source_language(["en".to_owned(), "ja".to_owned()]),
+            "mul"
+        );
+        assert_eq!(batch_source_language(["und".to_owned()]), "und");
+    }
 }

@@ -7,7 +7,6 @@ use axum::{
     response::{IntoResponse, Response},
     routing::{get, post},
 };
-use isolang::Language;
 use std::{
     fs, io,
     net::{IpAddr, SocketAddr},
@@ -24,7 +23,12 @@ use tower_http::{
 use tracing::{debug, info};
 
 mod endpoint;
+mod html;
 mod inference;
+mod inference_result;
+mod pipeline;
+mod protected;
+mod text;
 mod translation;
 
 const ENV_MODELS_PATH: &str = "MODELS_DIR";
@@ -40,6 +44,9 @@ const ENV_LOG_LEVEL: &str = "RUST_LOG";
 enum AppError {
     #[error("Translation error: {0}")]
     TranslationError(String),
+
+    #[error("Input too large: {0}")]
+    InputTooLarge(String),
 
     #[error("IO error: {0}")]
     IoError(#[from] io::Error),
@@ -58,6 +65,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
             Self::TranslationError(msg) => (StatusCode::BAD_REQUEST, msg),
+            Self::InputTooLarge(msg) => (StatusCode::PAYLOAD_TOO_LARGE, msg),
             Self::IoError(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()),
             Self::Unauthorized => (
                 StatusCode::UNAUTHORIZED,
@@ -74,7 +82,6 @@ impl IntoResponse for AppError {
 
 struct AppState {
     inference: inference::InferenceEngine,
-    sole_language_pair: Option<(Language, Language)>,
     api_key: Option<String>,
 }
 
@@ -215,13 +222,8 @@ async fn main() -> anyhow::Result<()> {
     info!("Loading translation models from {}", models_dir.display());
     let inference = inference::InferenceEngine::load(&models_dir, num_workers)
         .context("Failed to load translation models")?;
-    let sole_language_pair = inference.sole_language_pair();
 
-    let app_state = Arc::new(AppState {
-        inference,
-        sole_language_pair,
-        api_key,
-    });
+    let app_state = Arc::new(AppState { inference, api_key });
 
     let cors = CorsLayer::new()
         .allow_origin(AllowOrigin::mirror_request())

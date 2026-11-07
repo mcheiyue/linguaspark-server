@@ -162,12 +162,6 @@ impl InferenceEngine {
         })
     }
 
-    pub fn sole_language_pair(&self) -> Option<(Language, Language)> {
-        let mut pairs = self.models.keys();
-        let pair = *pairs.next()?;
-        pairs.next().is_none().then_some(pair)
-    }
-
     pub fn language_pairs(&self) -> BTreeMap<&Language, BTreeSet<&Language>> {
         let mut language_pairs = BTreeMap::new();
         for (from, to) in self.models.keys() {
@@ -196,20 +190,6 @@ impl InferenceEngine {
         }
 
         language_pairs
-    }
-
-    pub async fn translate(
-        &self,
-        from: Language,
-        to: Language,
-        text: &str,
-    ) -> Result<String, AppError> {
-        let mut translations = self
-            .translate_batch(from, to, vec![text.to_string()])
-            .await?;
-        translations.pop().ok_or_else(|| {
-            AppError::InferenceError("Single-input batch returned no translation".to_string())
-        })
     }
 
     pub async fn translate_batch(
@@ -262,13 +242,8 @@ fn translate_model_batch(
 ) -> Result<Vec<String>, AppError> {
     executor
         .translate_batch(model, texts, &DecodeOptions::default())
-        .map(|translations| {
-            translations
-                .into_iter()
-                .map(|translation| translation.text)
-                .collect()
-        })
         .map_err(|error| AppError::InferenceError(error.to_string()))
+        .and_then(|translations| crate::inference_result::collect(translations, texts.len()))
 }
 
 fn unsupported_pair(from: Language, to: Language) -> AppError {

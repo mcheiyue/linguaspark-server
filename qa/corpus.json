@@ -1,0 +1,302 @@
+{
+  "source_sha256": "08d8b4e09676a5e28bbb1d765d508aedc1079c1764ec44aef26b7e641172fb75",
+  "cases": [
+    {
+      "id": "ui",
+      "text": "Your changes have been saved. You can close this window and return to the dashboard.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "web",
+      "text": "The new update reduces power consumption without sacrificing performance. Existing users can upgrade for free, but a restart is required before the changes take effect.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "attention",
+      "text": "Deep thought rarely emerges from a mind that is constantly interrupted. People can answer messages while commuting, but being available is not the same as being present.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "technical",
+      "text": "If the upstream service returns HTTP 429, wait before retrying. Increasing concurrency may make the problem worse, even when average CPU usage remains low.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "reference",
+      "text": "Individuals can protect blocks of time for focused work and treat rest as part of the process of thinking rather than as a reward for finishing it.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "long_1",
+      "text": "In an age when information travels faster than ever before, the ability to learn continuously has become one of the most valuable skills a person can develop. Knowledge that was once considered specialized may become outdated within a few years, and industries that seemed stable can be reshaped by new technologies almost overnight. This does not mean that formal education is no longer important; rather, it means that education should be understood as a lifelong process rather than a single period of preparation. People who succeed in such an environment are not necessarily those who know the most at any given moment, but those who remain curious, adaptable, and willing to revise their assumptions when new evidence appears.\n\nAt the same time, the abundance of information creates its own challenges. Being able to find information is not the same as being able to evaluate it. A thoughtful learner must ask where a claim comes from, what evidence supports it, what interests might lie behind it, and whether alternative explanations are equally plausible. These habits of critical thinking are especially important in a world where misleading content can spread quickly and where emotional language often attracts more attention than careful reasoning. Without such habits, people may become more informed in quantity but less capable of making sound judgments.\n\nFinally, learning is not only an individual activity. Many of the most difficult problems we face—whether in science, business, or public life—require people with different backgrounds and perspectives to work together. Collaboration can be uncomfortable because it forces us to explain our ideas clearly, listen to criticism, and recognize the limits of our own understanding. Yet it is often through this friction that better ideas emerge. A society that values learning, therefore, should not only encourage individuals to study harder but also create conditions in which they can question, discuss, and cooperate. In the end, the purpose of learning is not merely to accumulate facts, but to become more capable of thinking clearly, acting responsibly, and contributing to the world in meaningful ways.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "long_2",
+      "text": "One of the defining paradoxes of modern life is that although we have more tools for saving time than any generation before us, many people feel more rushed than ever. Convenience has not automatically produced leisure; instead, it has often raised expectations about how much we should be able to accomplish in a single day. A person can now answer messages while commuting, attend a meeting while walking through an airport, and order almost anything without leaving home. Yet the very ease of these activities makes it harder to draw a clear line between work and rest, between being available and being present. When every spare moment can be filled with a task, the absence of activity begins to feel like a failure rather than a necessary condition for thinking clearly.\n\nThis has consequences for the quality of attention. Deep thought rarely emerges from a mind that is constantly interrupted. It requires long stretches of uninterrupted time, the willingness to tolerate boredom, and the patience to stay with a problem even when no immediate answer appears. By contrast, a fragmented mind may remain busy without becoming productive. It can react quickly to new information but struggle to connect ideas, weigh evidence, or recognize when a familiar assumption no longer fits the situation. In this sense, the greatest threat to careful thinking is not ignorance but distraction: the slow erosion of our capacity to concentrate on anything long enough to understand it.\n\nThe response to this problem should not be a romantic rejection of technology. Digital tools have made collaboration, research, and access to knowledge far easier than they once were. What is needed instead is a more deliberate relationship with attention. Individuals can protect blocks of time for focused work, resist the urge to fill every pause with a screen, and treat rest as part of the process of thinking rather than as a reward for finishing it. Organizations can reduce unnecessary meetings and reward thoughtful work rather than mere responsiveness. In the end, time management is less about squeezing more activity into each day than about deciding what deserves our attention in the first place.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "abbreviations",
+      "text": "Dr. Smith lives in the U.S. He paid $19.99, not $29.99. The value is 3.14, e.g. in the first example.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "layout",
+      "text": "  The first request succeeded.\n\nThe second request failed.\r\n\r\nPlease do not retry it.  ",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "placeholders",
+      "text": "Hello {{user_name}}, use ${region} and %s to open https://example.com/a?q=42&x=1. The price is $19.99, not $29.99.",
+      "preserve": [
+        "{{user_name}}",
+        "${region}",
+        "%s",
+        "https://example.com/a?q=42&x=1",
+        "$19.99",
+        "$29.99"
+      ],
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "code",
+      "text": "Run `npm install` before starting.\n```python\nprint('do not translate')\n```\nThe command must succeed.",
+      "preserve": [
+        "`npm install`",
+        "```python\nprint('do not translate')\n```"
+      ],
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "empty",
+      "text": "",
+      "exact": "",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "spaces",
+      "text": " \t\r\n \n",
+      "exact": " \t\r\n \n",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "protected_only",
+      "text": "{{name}} $19.99 `API_KEY`",
+      "exact": "{{name}} $19.99 `API_KEY`",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "unicode",
+      "text": "The café opens at 09:30. Guests must not share passwords. Prices remain unchanged.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "long_sentence",
+      "text": "When the service is unavailable the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, the administrator must inspect the logs and preserve all user data before restarting the server, because deleting the data is not an acceptable recovery strategy.",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "unbroken",
+      "text": "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "batch",
+      "text": [
+        "The first request succeeded.",
+        "Do not delete the backup.",
+        "The price has not changed."
+      ],
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "html",
+      "html": true,
+      "text": "<!--keep--><p class='lead'>Please open <a href='/docs?id=42&amp;x=1'>the documentation</a> before paying $19.99.</p><pre>do not translate</pre><code>API_KEY</code><script>const keep='original';</script><style>.original{color:red}</style><span translate='no'>Keep Me</span><span class='notranslate'>Original Name</span>",
+      "preserve": [
+        "$19.99",
+        "do not translate",
+        "API_KEY",
+        "const keep='original';",
+        ".original{color:red}",
+        "Keep Me",
+        "Original Name"
+      ],
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "html_entities",
+      "html": true,
+      "text": "Root text &amp; more.<p>Tom &amp; Jerry read &lt;three&gt; books.</p><p>Do not erase&nbsp;the backup.</p>",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "same_language",
+      "text": "你好，世界。不要删除备份。",
+      "from": "zh",
+      "exact": "你好，世界。不要删除备份。",
+      "to": "zh"
+    },
+    {
+      "id": "burst_01",
+      "text": "Save your changes before leaving the page.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_02",
+      "text": "The backup completed successfully.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_03",
+      "text": "This update does not delete your files.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_04",
+      "text": "Check the connection and try again.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_05",
+      "text": "Your account settings have been updated.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_06",
+      "text": "The document is ready for download.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_07",
+      "text": "The meeting starts in ten minutes.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_08",
+      "text": "You can cancel the request at any time.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_09",
+      "text": "Do not share this password with anyone.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_10",
+      "text": "Please select the correct language.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_11",
+      "text": "The server is temporarily unavailable.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_12",
+      "text": "This feature is available to all users.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_13",
+      "text": "You must restart the application to continue.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_14",
+      "text": "The payment has not been processed.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_15",
+      "text": "All changes are saved automatically.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_16",
+      "text": "The results are sorted by creation date.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_17",
+      "text": "This file cannot be opened in the browser.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_18",
+      "text": "We will notify you when the task is complete.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_19",
+      "text": "The original document remains unchanged.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    },
+    {
+      "id": "burst_20",
+      "text": "Use the search box to find a specific record.",
+      "group": "burst",
+      "from": "en",
+      "to": "zh"
+    }
+  ]
+}
