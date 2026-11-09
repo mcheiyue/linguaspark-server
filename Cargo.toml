@@ -20,7 +20,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 whichlang = "0.1"
 unicode-segmentation = "1.12"
 
-linguaspark = { git = "https://github.com/LinguaSpark/linguaspark.git", rev = "269605c" }
+linguaspark = { path = "vendor/linguaspark" }
 regex = "1.13.1"
 
 [profile.release]

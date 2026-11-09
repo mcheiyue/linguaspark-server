@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "scope": "numeric-literal regression only; semantic translation quality is not asserted",
+  "cases": [
+    {
+      "id": "retry_after_sentence_en_zh",
+      "text": "A 429 response is returned with a Retry-After header that indicates requests will be allowed for this client again after 3600 seconds (60 minutes):",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["429", "3600", "60"]
+    },
+    {
+      "id": "zero_en_zh",
+      "text": "The completed count is 0.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["0"]
+    },
+    {
+      "id": "decimal_en_zh",
+      "text": "The measured value is 3.14 units.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["3.14"]
+    },
+    {
+      "id": "negative_en_zh",
+      "text": "The balance changed by -12.5 points.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["-12.5"]
+    },
+    {
+      "id": "grouped_amount_en_zh",
+      "text": "The invoice total is 36,000 dollars.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["36,000"]
+    },
+    {
+      "id": "date_en_zh",
+      "text": "The maintenance window is scheduled for 2026-11-07.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["2026-11-07"]
+    },
+    {
+      "id": "time_en_zh",
+      "text": "The job starts at 09:30 UTC.",
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["09:30"]
+    },
+    {
+      "id": "zero_zh_en",
+      "text": "完成数量是 0。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["0"]
+    },
+    {
+      "id": "decimal_zh_en",
+      "text": "测量值是 3.14 个单位。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["3.14"]
+    },
+    {
+      "id": "negative_zh_en",
+      "text": "余额变化了 -12.5 分。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["-12.5"]
+    },
+    {
+      "id": "grouped_amount_zh_en",
+      "text": "发票总额是 36,000 美元。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["36,000"]
+    },
+    {
+      "id": "date_zh_en",
+      "text": "维护窗口安排在 2026-11-07。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["2026-11-07"]
+    },
+    {
+      "id": "time_zh_en",
+      "text": "任务在 09:30 UTC 开始。",
+      "from": "zh",
+      "to": "en",
+      "required_numbers": ["09:30"]
+    },
+    {
+      "id": "batch_order",
+      "text": [
+        "The first item is 101.",
+        "The second item is 202.",
+        "The third item is 303."
+      ],
+      "from": "en",
+      "to": "zh",
+      "required_numbers": ["101", "202", "303"],
+      "per_item_numbers": [["101"], ["202"], ["303"]]
+    },
+    {
+      "id": "html_numeric",
+      "text": "<p>Pay <strong>19.99</strong> before 2026-11-07 at 09:30.</p>",
+      "from": "en",
+      "to": "zh",
+      "html": true,
+      "required_numbers": ["19.99", "2026-11-07", "09:30"]
+    }
+  ]
+}
