@@ -15,6 +15,12 @@ pub fn end(text: &str) -> Option<usize> {
             return Some(digits + 2);
         }
     }
+    if let Some(rest) = text.strip_prefix("[p") {
+        let digits = rest.bytes().take_while(u8::is_ascii_digit).count();
+        if digits > 0 && rest.as_bytes().get(digits) == Some(&b']') {
+            return Some(digits + 3);
+        }
+    }
     if let Some(rest) = text.strip_prefix('[') {
         let digits = rest.bytes().take_while(u8::is_ascii_digit).count();
         if digits > 0 && rest.as_bytes().get(digits) == Some(&b']') {
@@ -40,7 +46,17 @@ mod tests {
 
     #[test]
     fn protects_mtran_boundaries_and_rejects_unrelated_literals() {
-        for literal in ["{12}", "[345]", "```py\nx=1\n```", "🇺🇸", "©", "®", "👩🏽‍💻"]
+        for literal in [
+            "{12}",
+            "[345]",
+            "[p0]",
+            "[p123]",
+            "```py\nx=1\n```",
+            "🇺🇸",
+            "©",
+            "®",
+            "👩🏽‍💻",
+        ]
         {
             assert_eq!(
                 end(&format!("{literal} remaining")),
@@ -53,6 +69,9 @@ mod tests {
             "{name}",
             "{12x}",
             "[12x]",
+            "[P1]",
+            "[p]",
+            "[p1x]",
             "3.14",
             "`npm install`",
             "$19.99",

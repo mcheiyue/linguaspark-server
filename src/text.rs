@@ -19,7 +19,11 @@ impl TextPlan {
             parts: Vec::new(),
             segments: Vec::new(),
         };
-        plan.prose(input);
+        if is_standalone_version(input) {
+            plan.literal(input);
+        } else {
+            plan.prose(input);
+        }
         plan
     }
 
@@ -140,6 +144,16 @@ impl TextPlan {
     }
 }
 
+fn is_standalone_version(text: &str) -> bool {
+    let Some(version) = text.trim().strip_prefix('v') else {
+        return false;
+    };
+    !version.is_empty()
+        && version
+            .split('.')
+            .all(|part| !part.is_empty() && part.bytes().all(|byte| byte.is_ascii_digit()))
+}
+
 fn abbreviation(text: &str) -> bool {
     let last = text.split_whitespace().last().unwrap_or("");
     matches!(
@@ -231,10 +245,55 @@ mod tests {
 
     #[test]
     fn protects_empty_and_code_only_text_without_inference() {
-        for source in ["", " \t\r\n", "{12} 👩‍💻", "```python\nprint('hello')\n```"] {
+        for source in [
+            "",
+            " \t\r\n",
+            "{12} [p0] [p123] 👩‍💻",
+            "[p0][p123]",
+            "```python\nprint('hello')\n```",
+        ] {
             let plan = TextPlan::new(source);
             assert!(plan.segments.is_empty());
             assert_eq!(plan.render(&[]).unwrap(), source);
+        }
+    }
+
+    #[test]
+    fn keeps_adjacent_citations_literal_and_translates_natural_sentences_independently() {
+        let source = "First [p0][p1] sentence. Second [p2] sentence.";
+        let plan = TextPlan::new(source);
+        assert_eq!(
+            plan.segments,
+            ["First", "sentence.", "Second", "sentence."].map(str::to_owned)
+        );
+        let translations = ["第一", "句子。", "第二", "句子。"].map(str::to_owned);
+        assert_eq!(
+            plan.render(&translations).unwrap(),
+            "第一 [p0][p1] 句子。 第二 [p2] 句子。"
+        );
+    }
+
+    #[test]
+    fn preserves_standalone_versions_with_original_whitespace() {
+        for source in ["v1", "  v1.2.3  "] {
+            let plan = TextPlan::new(source);
+            assert!(plan.segments.is_empty());
+            assert_eq!(plan.render(&[]).unwrap(), source);
+        }
+        for source in [
+            "v1x",
+            "v1.",
+            "version v1",
+            "https://example.com/v1",
+            "/tmp/v1",
+            "en",
+            "Blog",
+            "Audio",
+            "DL",
+            "Released on 2026-11-09.",
+            "Alice",
+        ] {
+            assert!(!TextPlan::new(source).segments.is_empty(), "{source}");
         }
     }
 
