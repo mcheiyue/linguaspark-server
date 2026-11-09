@@ -17,7 +17,24 @@ tokio = { version = "1", features = ["full"] }
 tower-http = { version = "0.7", features = ["cors", "trace"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-whichlang = "0.1"
+lingua = { version = "=1.8.0", default-features = false, features = [
+    "arabic",
+    "chinese",
+    "german",
+    "english",
+    "french",
+    "hindi",
+    "italian",
+    "japanese",
+    "korean",
+    "dutch",
+    "portuguese",
+    "russian",
+    "spanish",
+    "swedish",
+    "turkish",
+    "vietnamese",
+]}
 unicode-segmentation = "1.12"
 
 linguaspark = { path = "vendor/linguaspark" }

@@ -27,7 +27,7 @@ pub async fn detect_language(
     Json(request): Json<DetectLanguageRequest>,
 ) -> Result<Json<DetectLanguageResponse>, AppError> {
     Ok(Json(DetectLanguageResponse {
-        language: detect_language_code(&request.text)?.to_owned(),
+        language: detect_language_code(&request.text).await?.to_owned(),
     }))
 }
 
@@ -362,5 +362,22 @@ mod tests {
             "mul"
         );
         assert_eq!(batch_source_language(["und".to_owned()]), "und");
+    }
+
+    #[tokio::test]
+    async fn detect_endpoint_returns_language_or_bad_request_for_unknown_text() {
+        let detected = detect_language(Json(DetectLanguageRequest {
+            text: "View Paper".to_owned(),
+        }))
+        .await
+        .unwrap();
+        assert_eq!(detected.0.language, "en");
+
+        let error = detect_language(Json(DetectLanguageRequest {
+            text: "12345".to_owned(),
+        }))
+        .await
+        .unwrap_err();
+        assert!(matches!(error, AppError::TranslationError(_)));
     }
 }

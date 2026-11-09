@@ -1,7 +1,10 @@
 use crate::{AppError, AppState, pipeline::Document};
 use isolang::Language;
-use std::{collections::BTreeMap, sync::Arc};
-use whichlang::Lang;
+use lingua::{Language as LinguaLanguage, LanguageDetector, LanguageDetectorBuilder};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 
 pub fn parse_language_code(code: &str) -> Result<Language, AppError> {
     let lowered = code.to_ascii_lowercase();
@@ -34,7 +37,16 @@ pub fn language_code(language: &Language) -> &'static str {
     language.to_639_1().expect("language has no ISO 639-1 code")
 }
 
-pub fn detect_language_code(text: &str) -> Result<&'static str, AppError> {
+pub async fn detect_language_code(text: &str) -> Result<&'static str, AppError> {
+    let text = text.to_owned();
+    tokio::task::spawn_blocking(move || detect_language_code_sync(&text))
+        .await
+        .map_err(|error| {
+            AppError::InferenceError(format!("Language detection task failed: {error}"))
+        })?
+}
+
+fn detect_language_code_sync(text: &str) -> Result<&'static str, AppError> {
     Ok(language_code(&detect_language(text)?))
 }
 
@@ -42,43 +54,76 @@ pub fn normalize_language_code(code: &str) -> Result<&'static str, AppError> {
     Ok(language_code(&parse_language_code(code)?))
 }
 
-fn from_whichlang(language: Lang) -> Language {
+static LANGUAGE_DETECTOR: LazyLock<LanguageDetector> = LazyLock::new(|| {
+    LanguageDetectorBuilder::from_languages(&[
+        LinguaLanguage::Arabic,
+        LinguaLanguage::Chinese,
+        LinguaLanguage::German,
+        LinguaLanguage::English,
+        LinguaLanguage::French,
+        LinguaLanguage::Hindi,
+        LinguaLanguage::Italian,
+        LinguaLanguage::Japanese,
+        LinguaLanguage::Korean,
+        LinguaLanguage::Dutch,
+        LinguaLanguage::Portuguese,
+        LinguaLanguage::Russian,
+        LinguaLanguage::Spanish,
+        LinguaLanguage::Swedish,
+        LinguaLanguage::Turkish,
+        LinguaLanguage::Vietnamese,
+    ])
+    .build()
+});
+
+fn from_lingua(language: LinguaLanguage) -> Language {
     match language {
-        Lang::Ara => Language::Ara,
-        // whichlang uses "cmn" for Chinese, but only Zho has the ISO 639-1 code "zh"
-        Lang::Cmn => Language::Zho,
-        Lang::Deu => Language::Deu,
-        Lang::Eng => Language::Eng,
-        Lang::Fra => Language::Fra,
-        Lang::Hin => Language::Hin,
-        Lang::Ita => Language::Ita,
-        Lang::Jpn => Language::Jpn,
-        Lang::Kor => Language::Kor,
-        Lang::Nld => Language::Nld,
-        Lang::Por => Language::Por,
-        Lang::Rus => Language::Rus,
-        Lang::Spa => Language::Spa,
-        Lang::Swe => Language::Swe,
-        Lang::Tur => Language::Tur,
-        Lang::Vie => Language::Vie,
+        LinguaLanguage::Arabic => Language::Ara,
+        LinguaLanguage::Chinese => Language::Zho,
+        LinguaLanguage::German => Language::Deu,
+        LinguaLanguage::English => Language::Eng,
+        LinguaLanguage::French => Language::Fra,
+        LinguaLanguage::Hindi => Language::Hin,
+        LinguaLanguage::Italian => Language::Ita,
+        LinguaLanguage::Japanese => Language::Jpn,
+        LinguaLanguage::Korean => Language::Kor,
+        LinguaLanguage::Dutch => Language::Nld,
+        LinguaLanguage::Portuguese => Language::Por,
+        LinguaLanguage::Russian => Language::Rus,
+        LinguaLanguage::Spanish => Language::Spa,
+        LinguaLanguage::Swedish => Language::Swe,
+        LinguaLanguage::Turkish => Language::Tur,
+        LinguaLanguage::Vietnamese => Language::Vie,
     }
 }
 
-#[expect(clippy::unnecessary_wraps, reason = "detector may become fallible")]
 fn detect_language(text: &str) -> Result<Language, AppError> {
-    Ok(from_whichlang(whichlang::detect_language(text)))
+    LANGUAGE_DETECTOR
+        .detect_language_of(text)
+        .map(from_lingua)
+        .ok_or_else(|| {
+            AppError::TranslationError("Unable to detect the language of the provided text".into())
+        })
 }
 
-fn resolve_source_language(text: &str, from_lang: Option<&str>) -> Result<Language, AppError> {
+async fn resolve_source_language(
+    text: String,
+    from_lang: Option<&str>,
+) -> Result<Language, AppError> {
     let explicit = from_lang.filter(|code| !code.is_empty() && !code.eq_ignore_ascii_case("auto"));
 
     match explicit {
         Some(code) => parse_source_language_code(code),
-        None => detect_language(text),
+        None => match tokio::task::spawn_blocking(move || detect_language(&text)).await {
+            Ok(result) => result,
+            Err(error) => Err(AppError::InferenceError(format!(
+                "Language detection task failed: {error}"
+            ))),
+        },
     }
 }
 
-fn detected_document_language(
+async fn detected_document_language(
     document: &Document,
     from_lang: Option<&str>,
 ) -> Result<Option<Language>, AppError> {
@@ -86,7 +131,9 @@ fn detected_document_language(
     if detected_text.trim().is_empty() {
         return Ok(None);
     }
-    resolve_source_language(&detected_text, from_lang).map(Some)
+    resolve_source_language(detected_text, from_lang)
+        .await
+        .map(Some)
 }
 
 pub async fn perform_translation(
@@ -148,10 +195,10 @@ pub async fn perform_formatted_batch(
     let explicit_source = options
         .from
         .filter(|source| !source.is_empty() && !source.eq_ignore_ascii_case("auto"));
-    let detected_sources = documents
-        .iter()
-        .map(|document| detected_document_language(document, options.from))
-        .collect::<Result<Vec<_>, _>>()?;
+    let mut detected_sources = Vec::with_capacity(documents.len());
+    for document in &documents {
+        detected_sources.push(detected_document_language(document, options.from).await?);
+    }
     let explicit_source_code = explicit_source
         .map(parse_source_language_code)
         .transpose()?
@@ -243,15 +290,19 @@ pub async fn perform_formatted_batch(
 mod tests {
     use super::*;
 
-    #[test]
-    fn explicit_and_detected_languages_are_honored() {
+    #[tokio::test]
+    async fn explicit_and_detected_languages_are_honored() {
         let japanese = "これは日本語の文章です。英語として翻訳しないでください。";
         assert_eq!(
-            resolve_source_language(japanese, None).unwrap(),
+            resolve_source_language(japanese.to_owned(), None)
+                .await
+                .unwrap(),
             Language::Jpn
         );
         assert_eq!(
-            resolve_source_language(japanese, Some("en")).unwrap(),
+            resolve_source_language(japanese.to_owned(), Some("en"))
+                .await
+                .unwrap(),
             Language::Eng
         );
         assert_eq!(parse_language_code("zh-Hans").unwrap(), Language::Zho);
@@ -259,25 +310,95 @@ mod tests {
         assert_eq!(parse_source_language_code("zh-TW").unwrap(), Language::Zho);
     }
 
+    #[tokio::test]
+    async fn explicit_source_language_does_not_require_detection() {
+        assert_eq!(
+            resolve_source_language("".to_owned(), Some("ja"))
+                .await
+                .unwrap(),
+            Language::Jpn
+        );
+        assert_eq!(
+            detected_document_language(
+                &Document::new("<code>12345</code>", true).unwrap(),
+                Some("ja")
+            )
+            .await
+            .unwrap(),
+            None
+        );
+    }
+
     #[test]
-    fn detects_each_document_from_translatable_content_only() {
+    fn unknown_detection_is_a_bad_request_with_a_stable_message() {
+        for text in ["", "12345"] {
+            let error = detect_language_code_sync(text).unwrap_err();
+            assert!(matches!(
+                error,
+                AppError::TranslationError(message)
+                    if message == "Unable to detect the language of the provided text"
+            ));
+        }
+    }
+
+    #[tokio::test]
+    async fn unrecognized_translatable_text_returns_unable_to_detect_error() {
+        let document = Document::new("Αυτό είναι ένα ελληνικό κείμενο.", true).unwrap();
+        let error = detected_document_language(&document, None)
+            .await
+            .unwrap_err();
+        assert!(matches!(
+            error,
+            AppError::TranslationError(message)
+                if message == "Unable to detect the language of the provided text"
+        ));
+    }
+
+    #[tokio::test]
+    async fn detects_each_document_from_translatable_content_only() {
         let documents = [
             Document::new("<b>Hello world.</b>", true).unwrap(),
             Document::new("これは日本語です。", false).unwrap(),
             Document::new("<code>{12}</code>", true).unwrap(),
+            Document::new("<b>View Paper</b><code>21k views</code>", true).unwrap(),
         ];
 
         assert_eq!(
-            detected_document_language(&documents[0], None).unwrap(),
+            detected_document_language(&documents[0], None)
+                .await
+                .unwrap(),
             Some(Language::Eng)
         );
         assert_eq!(
-            detected_document_language(&documents[1], None).unwrap(),
+            detected_document_language(&documents[1], None)
+                .await
+                .unwrap(),
             Some(Language::Jpn)
         );
         assert_eq!(
-            detected_document_language(&documents[2], None).unwrap(),
+            detected_document_language(&documents[2], None)
+                .await
+                .unwrap(),
             None
         );
+        assert_eq!(
+            detected_document_language(&documents[3], None)
+                .await
+                .unwrap(),
+            Some(Language::Eng)
+        );
+    }
+
+    #[tokio::test]
+    async fn known_english_page_fragments_are_detected_as_english() {
+        for text in ["Abstract", "View Paper", "AI Overview", "Edit", "21k views"] {
+            assert_eq!(
+                resolve_source_language(text.to_owned(), None)
+                    .await
+                    .unwrap(),
+                Language::Eng,
+                "expected {text:?} to be detected as English"
+            );
+        }
     }
 }
